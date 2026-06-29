@@ -781,3 +781,39 @@ input::placeholder {
     color: var(--text-muted);
 }
 
+/* Google Login Styles */
+.auth-divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 1.5rem 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.auth-divider span {
+    padding: 0 10px;
+}
+
+.btn-google {
+    background: white;
+    color: #444;
+    border: 1px solid #ddd;
+    margin-bottom: 1rem;
+}
+
+.btn-google:hover {
+    background: #f8f9fa;
+    box-shadow: 0 4px 12px rgba(255, 255, 255, 0.1);
+}
+
+.btn-google i {
+    color: #db4437; /* Google red */
+}
