@@ -817,3 +817,71 @@ input::placeholder {
 .btn-google i {
     color: #db4437; /* Google red */
 }
+
+/* Checkout FAB */
+.checkout-fab {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    padding: 0;
+    font-size: 1.5rem;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+    z-index: 90;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.checkout-fab .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--danger);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 700;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--bg-darker);
+}
+
+.checkout-fab.hidden {
+    display: none !important;
+}
+
+/* Checkout item */
+.checkout-item-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.checkout-item-actions button {
+    padding: 0.25rem 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.checkout-item-actions button:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.btn-success {
+    background-color: var(--success);
+    color: white;
+}
+.btn-success:hover {
+    background-color: #059669;
+    transform: translateY(-2px);
+}
+
