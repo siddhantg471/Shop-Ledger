@@ -49,6 +49,18 @@ const dropItemName = document.getElementById('drop-item-name');
 const dropCurrentStock = document.getElementById('drop-current-stock');
 const dropAmountInput = document.getElementById('drop-amount');
 
+// Checkout Elements
+const checkoutFab = document.getElementById('checkout-fab');
+const checkoutBadge = document.getElementById('checkout-badge');
+const checkoutModal = document.getElementById('checkout-modal');
+const closeCheckoutModalBtn = document.getElementById('close-checkout-modal');
+const cancelCheckoutModalBtn = document.getElementById('cancel-checkout-modal');
+const checkoutList = document.getElementById('checkout-list');
+const checkoutEmptyState = document.getElementById('checkout-empty-state');
+const checkoutTotalItems = document.getElementById('checkout-total-items');
+const checkoutTotalCost = document.getElementById('checkout-total-cost');
+const confirmAllDropsBtn = document.getElementById('confirm-all-drops-btn');
+
 // Toast
 const toast = document.getElementById('toast');
 
@@ -76,6 +88,7 @@ let currentEditItemId = null;
 let currentDropItemId = null;
 let unsubscribeSnapshot = null;
 let unsubscribeTransactions = null;
+let cart = {}; // cart state for checkout
 
 // Mock user for LocalStorage fallback
 const MOCK_USER = { uid: 'local-user', email: 'demo@shopledger.local' };
@@ -715,7 +728,7 @@ const closeDropModal = () => {
 closeDropModalBtn.addEventListener('click', closeDropModal);
 cancelDropModalBtn.addEventListener('click', closeDropModal);
 
-dropForm.addEventListener('submit', async (e) => {
+dropForm.addEventListener('submit', (e) => {
     e.preventDefault();
     const dropAmount = parseInt(dropAmountInput.value);
     const currentStock = parseInt(dropCurrentStock.textContent);
@@ -724,40 +737,171 @@ dropForm.addEventListener('submit', async (e) => {
         showToast("Please enter a valid amount to drop", true);
         return;
     }
+
+    const existingCartQty = cart[currentDropItemId] ? cart[currentDropItemId].quantity : 0;
     
-    if (dropAmount > currentStock) {
-        showToast("Cannot drop more than current stock!", true);
+    if (dropAmount + existingCartQty > currentStock) {
+        showToast(`Cannot add more! You already have ${existingCartQty} in checkout.`, true);
         return;
     }
 
-    const confirmBtn = document.getElementById('confirm-drop-btn');
-    confirmBtn.disabled = true;
-
-    const newStock = currentStock - dropAmount;
-    
     const item = inventoryData.find(i => i.id === currentDropItemId);
     const pricePerPiece = item ? (item.pricePerPiece || 0) : 0;
-    const totalPrice = pricePerPiece * dropAmount;
-
-    try {
-        await updateStockInDB(currentDropItemId, newStock);
-        
-        await saveTransactionToDB({
+    
+    if (cart[currentDropItemId]) {
+        cart[currentDropItemId].quantity += dropAmount;
+    } else {
+        cart[currentDropItemId] = {
             itemId: currentDropItemId,
             itemName: dropItemName.textContent,
             quantity: dropAmount,
             pricePerPiece: pricePerPiece,
-            totalPrice: totalPrice,
-            type: 'sale'
-        });
+            currentStock: currentStock
+        };
+    }
 
-        showToast(`Dropped ${dropAmount} pieces successfully.`);
-        closeDropModal();
+    updateCheckoutBadge();
+    showToast(`Added ${dropAmount} pieces to checkout.`);
+    closeDropModal();
+});
+
+// --- Checkout Logic ---
+function updateCheckoutBadge() {
+    let total = 0;
+    for (let key in cart) {
+        total += cart[key].quantity;
+    }
+    checkoutBadge.textContent = total;
+    if (total > 0) {
+        checkoutFab.classList.remove('hidden');
+    } else {
+        checkoutFab.classList.add('hidden');
+    }
+}
+
+function renderCheckoutList() {
+    checkoutList.innerHTML = '';
+    let totalItems = 0;
+    let totalCost = 0;
+    const cartKeys = Object.keys(cart);
+
+    if (cartKeys.length === 0) {
+        checkoutEmptyState.classList.remove('hidden');
+    } else {
+        checkoutEmptyState.classList.add('hidden');
+        cartKeys.forEach(key => {
+            const item = cart[key];
+            const itemTotal = item.quantity * item.pricePerPiece;
+            totalItems += item.quantity;
+            totalCost += itemTotal;
+
+            const div = document.createElement('div');
+            div.className = 'transaction-item';
+            div.innerHTML = `
+                <div class="transaction-info">
+                    <span class="transaction-name">${item.itemName}</span>
+                    <span class="transaction-meta">₹${item.pricePerPiece.toFixed(2)}/pc</span>
+                </div>
+                <div class="checkout-item-actions">
+                    <button class="btn-dec" data-id="${key}">-</button>
+                    <span style="font-weight:bold; width: 30px; text-align: center;">${item.quantity}</span>
+                    <button class="btn-inc" data-id="${key}">+</button>
+                    <button class="btn-remove" data-id="${key}" style="background:var(--danger); margin-left:10px;"><i class="fa-solid fa-trash"></i></button>
+                </div>
+                <div class="transaction-value">
+                    <span class="transaction-price">₹${itemTotal.toFixed(2)}</span>
+                </div>
+            `;
+            checkoutList.appendChild(div);
+        });
+    }
+
+    checkoutTotalItems.textContent = totalItems;
+    checkoutTotalCost.textContent = totalCost.toFixed(2);
+    
+    // Add event listeners for buttons
+    checkoutList.querySelectorAll('.btn-dec').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = e.currentTarget.getAttribute('data-id');
+            if (cart[id].quantity > 1) {
+                cart[id].quantity--;
+            } else {
+                delete cart[id];
+            }
+            updateCheckoutBadge();
+            renderCheckoutList();
+        });
+    });
+
+    checkoutList.querySelectorAll('.btn-inc').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = e.currentTarget.getAttribute('data-id');
+            if (cart[id].quantity < cart[id].currentStock) {
+                cart[id].quantity++;
+                updateCheckoutBadge();
+                renderCheckoutList();
+            } else {
+                showToast("Cannot exceed available stock!", true);
+            }
+        });
+    });
+
+    checkoutList.querySelectorAll('.btn-remove').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = e.currentTarget.getAttribute('data-id');
+            delete cart[id];
+            updateCheckoutBadge();
+            renderCheckoutList();
+        });
+    });
+}
+
+const openCheckoutModal = () => {
+    renderCheckoutList();
+    checkoutModal.classList.remove('hidden');
+};
+
+const closeCheckoutModal = () => {
+    checkoutModal.classList.add('hidden');
+};
+
+checkoutFab.addEventListener('click', openCheckoutModal);
+closeCheckoutModalBtn.addEventListener('click', closeCheckoutModal);
+cancelCheckoutModalBtn.addEventListener('click', closeCheckoutModal);
+
+confirmAllDropsBtn.addEventListener('click', async () => {
+    const cartKeys = Object.keys(cart);
+    if (cartKeys.length === 0) return;
+
+    confirmAllDropsBtn.disabled = true;
+    confirmAllDropsBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
+
+    try {
+        for (const key of cartKeys) {
+            const item = cart[key];
+            const newStock = item.currentStock - item.quantity;
+            const totalPrice = item.pricePerPiece * item.quantity;
+
+            await updateStockInDB(key, newStock);
+            await saveTransactionToDB({
+                itemId: key,
+                itemName: item.itemName,
+                quantity: item.quantity,
+                pricePerPiece: item.pricePerPiece,
+                totalPrice: totalPrice,
+                type: 'sale'
+            });
+        }
+        showToast("All drops confirmed successfully!");
+        cart = {}; // empty cart
+        updateCheckoutBadge();
+        closeCheckoutModal();
     } catch (error) {
         console.error(error);
-        showToast("Failed to update stock.", true);
+        showToast("An error occurred during checkout.", true);
     } finally {
-        confirmBtn.disabled = false;
+        confirmAllDropsBtn.disabled = false;
+        confirmAllDropsBtn.textContent = 'Confirm All Drops';
     }
 });
 
