@@ -198,6 +198,12 @@
         </main>
     </div>
 
+    <!-- CHECKOUT FAB -->
+    <button id="checkout-fab" class="btn btn-primary checkout-fab hidden" title="Checkout">
+        <i class="fa-solid fa-cart-shopping"></i>
+        <span id="checkout-badge" class="badge">0</span>
+    </button>
+
     <!-- ADD/EDIT ITEM MODAL -->
     <div id="item-modal" class="modal-overlay hidden">
         <div class="modal-content glass-card">
@@ -253,25 +259,51 @@
         </div>
     </div>
 
+    <!-- CHECKOUT MODAL -->
+    <div id="checkout-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3>Checkout Summary</h3>
+                <button class="close-btn" id="close-checkout-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="checkout-list-container" style="max-height: 50vh; overflow-y: auto; margin-bottom: 1rem;">
+                <div id="checkout-list" class="transactions-list">
+                    <!-- Items injected here -->
+                </div>
+                <div id="checkout-empty-state" class="empty-state hidden">
+                    <p>No items added to checkout yet.</p>
+                </div>
+            </div>
+            <div class="checkout-total" style="display: flex; justify-content: space-between; border-top: 1px solid var(--glass-border); padding-top: 1rem; margin-bottom: 1rem;">
+                <h4>Total Items: <span id="checkout-total-items">0</span></h4>
+                <h4>Total Cost: ₹<span id="checkout-total-cost">0.00</span></h4>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-text" id="cancel-checkout-modal">Cancel</button>
+                <button type="button" class="btn btn-success" id="confirm-all-drops-btn" style="background-color: var(--success); color: white;">Confirm All Drops</button>
+            </div>
+        </div>
+    </div>
+
     <!-- DROP STOCK MODAL -->
     <div id="drop-modal" class="modal-overlay hidden">
         <div class="modal-content glass-card modal-sm">
             <div class="modal-header">
-                <h3>Drop Stock</h3>
+                <h3>Add to Checkout</h3>
                 <button class="close-btn" id="close-drop-modal"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="drop-info">
-                <p>Reducing stock for <strong id="drop-item-name">Item Name</strong></p>
+                <p>Adding stock to checkout for <strong id="drop-item-name">Item Name</strong></p>
                 <p class="current-stock">Current Stock: <span id="drop-current-stock">0</span> pcs</p>
             </div>
             <form id="drop-form">
                 <div class="input-group">
-                    <label for="drop-amount">Amount to Drop (Pieces)</label>
+                    <label for="drop-amount">Amount to Add (Pieces)</label>
                     <input type="number" id="drop-amount" placeholder="1" min="1" required>
                 </div>
                 <div class="modal-actions">
                     <button type="button" class="btn btn-text" id="cancel-drop-modal">Cancel</button>
-                    <button type="submit" class="btn btn-danger" id="confirm-drop-btn">Confirm Drop</button>
+                    <button type="submit" class="btn btn-primary" id="confirm-drop-btn">Add to Checkout</button>
                 </div>
             </form>
         </div>
