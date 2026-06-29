@@ -5,14 +5,15 @@ import { getFirestore } from "https://www.gstatic.com/firebasejs/10.8.0/firebase
 
 
 const firebaseConfig = {
-    apiKey: "AIzaSyAH2x-NOnWqm45Z04lYd0f3Xm6Y1zxGBxA",
-    authDomain: "laedger-of-shop.firebaseapp.com",
-    projectId: "laedger-of-shop",
-    storageBucket: "laedger-of-shop.firebasestorage.app",
-    messagingSenderId: "783831037063",
-    appId: "1:783831037063:web:19ebfdab4d2e6838dfb422",
-    measurementId: "G-FLZFDHKBZP"
+  apiKey: "AIzaSyAH2x-NOnWqm45Z04lYd0f3Xm6Y1zxGBxA",
+  authDomain: "laedger-of-shop.firebaseapp.com",
+  projectId: "laedger-of-shop",
+  storageBucket: "laedger-of-shop.firebasestorage.app",
+  messagingSenderId: "783831037063",
+  appId: "1:783831037063:web:37efabb44e1801cedfb422",
+  measurementId: "G-S3ZH66TEJW"
 };
+
 
 let app, auth, db;
 let isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY";
