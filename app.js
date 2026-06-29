@@ -1,5 +1,5 @@
 import { auth, db, isFirebaseConfigured } from './firebase-config.js';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 import { collection, addDoc, getDocs, doc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
 // --- DOM Elements ---
@@ -12,6 +12,7 @@ const passwordInput = document.getElementById('password');
 const authToggleLink = document.getElementById('toggle-auth-mode');
 const authToggleText = document.getElementById('auth-toggle-text');
 const authSubmitBtn = document.getElementById('auth-submit-btn');
+const googleLoginBtn = document.getElementById('google-login-btn');
 
 // App Header
 const userEmailDisplay = document.getElementById('user-email');
@@ -197,6 +198,20 @@ authForm.addEventListener('submit', async (e) => {
 
     authSubmitBtn.disabled = false;
     authSubmitBtn.innerHTML = `<span>${isLoginMode ? 'Login' : 'Sign Up'}</span><i class="fa-solid fa-arrow-right"></i>`;
+});
+
+googleLoginBtn.addEventListener('click', async () => {
+    if (isFirebaseConfigured) {
+        const provider = new GoogleAuthProvider();
+        try {
+            await signInWithPopup(auth, provider);
+            showToast("Logged in with Google successfully!");
+        } catch (error) {
+            showToast(error.message, true);
+        }
+    } else {
+        showToast("Google Sign-in requires Firebase to be configured.", true);
+    }
 });
 
 logoutBtn.addEventListener('click', async () => {
