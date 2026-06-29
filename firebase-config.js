@@ -15,7 +15,7 @@ const firebaseConfig = {
 };
 
 let app, auth, db;
-let isFirebaseConfigured = firebaseConfig.apiKey !== "AIzaSyAH2x-NOnWqm45Z04lYd0f3Xm6Y1zxGBxA";
+let isFirebaseConfigured = firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY";
 
 if (isFirebaseConfigured) {
     try {
