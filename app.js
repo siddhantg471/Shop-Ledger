@@ -688,8 +688,8 @@ itemForm.addEventListener('submit', async (e) => {
         }
         closeAddModal();
     } catch (error) {
-        console.error(error);
-        showToast("Failed to save item.", true);
+        console.error("Error saving item:", error);
+        showToast("Failed to save item: " + error.message, true);
     } finally {
         saveBtn.disabled = false;
     }
