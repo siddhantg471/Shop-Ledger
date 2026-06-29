@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Ledger | Inventory Management</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Background Decoration -->
+    <div class="bg-shape shape-1"></div>
+    <div class="bg-shape shape-2"></div>
+
+    <!-- AUTHENTICATION SECTION -->
+    <div id="auth-section" class="container auth-container">
+        <div class="glass-card auth-card">
+            <div class="brand">
+                <div class="brand-icon-wrapper">
+                    <i class="fa-solid fa-boxes-stacked brand-icon"></i>
+                </div>
+                <h1>Shop Ledger</h1>
+            </div>
+            <p class="subtitle">Manage your inventory efficiently</p>
+            
+            <form id="auth-form">
+                <div class="input-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-envelope"></i>
+                        <input type="email" id="email" placeholder="shop@example.com" required>
+                    </div>
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-lock"></i>
+                        <input type="password" id="password" placeholder="••••••••" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="auth-submit-btn">
+                    <span>Login</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+                <div class="auth-toggle">
+                    <span id="auth-toggle-text">Don't have an account? <a href="#" id="toggle-auth-mode">Sign up</a></span>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MAIN APP SECTION -->
+    <div id="app-section" class="container app-container hidden">
+        <header class="app-header glass-card">
+            <div class="brand">
+                <i class="fa-solid fa-boxes-stacked brand-icon"></i>
+                <h2>Shop Ledger</h2>
+            </div>
+            <div class="user-controls">
+                <span id="user-email" class="user-email"></span>
+                <button id="logout-btn" class="btn btn-icon btn-outline" title="Logout">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="app-main">
+            <!-- Navigation Tabs -->
+            <div class="nav-tabs">
+                <button class="tab-btn active" data-target="inventory-view"><i class="fa-solid fa-boxes-stacked"></i> Inventory</button>
+                <button class="tab-btn" data-target="sales-view"><i class="fa-solid fa-chart-line"></i> Sales History</button>
+            </div>
+
+            <!-- INVENTORY VIEW -->
+            <div id="inventory-view" class="view-section active">
+                <!-- Stats overview -->
+            <section class="stats-grid">
+                <div class="stat-card glass-card">
+                    <div class="stat-icon icon-blue"><i class="fa-solid fa-box"></i></div>
+                    <div class="stat-info">
+                        <h3>Total Items</h3>
+                        <p id="total-items-count">0</p>
+                    </div>
+                </div>
+                <div class="stat-card glass-card">
+                    <div class="stat-icon icon-green"><i class="fa-solid fa-layer-group"></i></div>
+                    <div class="stat-info">
+                        <h3>Total Stock (Pcs)</h3>
+                        <p id="total-stock-count">0</p>
+                    </div>
+                </div>
+                <div class="stat-card glass-card add-item-trigger" id="open-add-modal">
+                    <div class="add-icon"><i class="fa-solid fa-plus"></i></div>
+                    <h3>Add New Item</h3>
+                </div>
+            </section>
+
+            <!-- Inventory List -->
+            <section class="inventory-section glass-card">
+                <div class="section-header">
+                    <h3>Current Inventory</h3>
+                    <div class="search-box">
+                        <i class="fa-solid fa-search"></i>
+                        <input type="text" id="search-input" placeholder="Search items...">
+                    </div>
+                </div>
+                <div class="inventory-grid" id="inventory-grid">
+                    <!-- Items will be injected here via JS -->
+                </div>
+                <!-- Empty state -->
+                <div id="empty-state" class="empty-state hidden">
+                    <div class="empty-icon-wrapper">
+                        <i class="fa-solid fa-box-open"></i>
+                    </div>
+                    <p>No items found. Add an item to get started.</p>
+                </div>
+                <!-- Loading state -->
+                <div id="loading-state" class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading inventory...</p>
+                </div>
+            </section>
+            </div> <!-- End Inventory View -->
+
+            <!-- SALES HISTORY VIEW -->
+            <div id="sales-view" class="view-section hidden">
+                <!-- Sales Dashboard -->
+                <section class="stats-grid">
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon icon-blue"><i class="fa-solid fa-clock"></i></div>
+                        <div class="stat-info">
+                            <h3>Last 24h Sales (₹)</h3>
+                            <p id="sales-24h">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon icon-green"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Revenue</h3>
+                            <p id="sales-total-revenue">0</p>
+                        </div>
+                    </div>
+                    <div class="stat-card glass-card">
+                        <div class="stat-icon icon-blue"><i class="fa-solid fa-ice-cream"></i></div>
+                        <div class="stat-info">
+                            <h3>Total Items Sold</h3>
+                            <p id="sales-total-items">0</p>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="sales-section glass-card">
+                    <div class="section-header">
+                        <h3>Transaction History</h3>
+                        <div class="sales-filters">
+                            <select id="sales-filter-type">
+                                <option value="all">All Time</option>
+                                <option value="date">Specific Date</option>
+                                <option value="month">Specific Month</option>
+                            </select>
+                            <input type="date" id="sales-date-filter" class="hidden">
+                            <input type="month" id="sales-month-filter" class="hidden">
+                        </div>
+                    </div>
+                    
+                    <div class="transactions-list" id="transactions-list">
+                        <!-- Transactions will be injected here -->
+                    </div>
+                    
+                    <div id="sales-empty-state" class="empty-state hidden">
+                        <div class="empty-icon-wrapper">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                        <p>No sales found for this period.</p>
+                    </div>
+                </section>
+            </div> <!-- End Sales View -->
+        </main>
+    </div>
+
+    <!-- ADD/EDIT ITEM MODAL -->
+    <div id="item-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-card">
+            <div class="modal-header">
+                <h3 id="modal-title">Add New Item</h3>
+                <button class="close-btn" id="close-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="item-form">
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="item-name">Item Name</label>
+                        <input type="text" id="item-name" placeholder="e.g. Wireless Mouse" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="input-group">
+                        <label for="item-picture">Item Picture (Optional)</label>
+                        <input type="file" id="item-picture" accept="image/*" capture="environment">
+                        <small class="helper-text">Take a photo or choose from gallery.</small>
+                    </div>
+                </div>
+                <div class="form-row split-row">
+                    <div class="input-group">
+                        <label for="pieces-per-box">Pieces per Box</label>
+                        <input type="number" id="pieces-per-box" placeholder="e.g. 24" min="1" required>
+                    </div>
+                    <div class="input-group">
+                        <label for="number-of-boxes">Total Boxes</label>
+                        <input type="number" id="number-of-boxes" placeholder="e.g. 2" min="1" required>
+                    </div>
+                </div>
+                <div class="form-row split-row">
+                    <div class="input-group">
+                        <label for="piece-price">Per Piece Price (₹)</label>
+                        <input type="number" id="piece-price" placeholder="e.g. 10" min="0" required step="0.01">
+                    </div>
+                    <div class="input-group" style="opacity: 0.8;">
+                        <label for="box-price">Per Box Price (₹) (Auto)</label>
+                        <input type="number" id="box-price" placeholder="0" readonly>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="input-group" style="opacity: 0.8;">
+                        <label for="item-pieces">Total Pieces (Auto-calculated)</label>
+                        <input type="number" id="item-pieces" placeholder="0" readonly>
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-text" id="cancel-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="save-item-btn">Save Item</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DROP STOCK MODAL -->
+    <div id="drop-modal" class="modal-overlay hidden">
+        <div class="modal-content glass-card modal-sm">
+            <div class="modal-header">
+                <h3>Drop Stock</h3>
+                <button class="close-btn" id="close-drop-modal"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="drop-info">
+                <p>Reducing stock for <strong id="drop-item-name">Item Name</strong></p>
+                <p class="current-stock">Current Stock: <span id="drop-current-stock">0</span> pcs</p>
+            </div>
+            <form id="drop-form">
+                <div class="input-group">
+                    <label for="drop-amount">Amount to Drop (Pieces)</label>
+                    <input type="number" id="drop-amount" placeholder="1" min="1" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-text" id="cancel-drop-modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger" id="confirm-drop-btn">Confirm Drop</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application Logic -->
+    <script type="module" src="firebase-config.js"></script>
+    <script type="module" src="app.js"></script>
+</body>
+</html>
