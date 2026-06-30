@@ -60,6 +60,10 @@ const checkoutEmptyState = document.getElementById('checkout-empty-state');
 const checkoutTotalItems = document.getElementById('checkout-total-items');
 const checkoutTotalCost = document.getElementById('checkout-total-cost');
 const confirmAllDropsBtn = document.getElementById('confirm-all-drops-btn');
+const customSaleNameInput = document.getElementById('custom-sale-name');
+const customSaleQtyInput = document.getElementById('custom-sale-qty');
+const customSalePriceInput = document.getElementById('custom-sale-price');
+const addCustomSaleBtn = document.getElementById('add-custom-sale-btn');
 
 // Toast
 const toast = document.getElementById('toast');
@@ -401,7 +405,19 @@ function renderInventory(searchTerm = '') {
             emptyState.querySelector('p').textContent = "No items found. Add an item to get started.";
         } else {
             emptyState.classList.remove('hidden');
-            emptyState.querySelector('p').textContent = "No items match your search.";
+            emptyState.querySelector('p').innerHTML = `No items match "<b>${searchTerm}</b>". <a href="#" id="quick-sell-link" style="color: var(--primary); text-decoration: underline;">Sell as unseen stock?</a>`;
+            
+            setTimeout(() => {
+                const quickSellLink = document.getElementById('quick-sell-link');
+                if (quickSellLink) {
+                    quickSellLink.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        customSaleNameInput.value = searchTerm;
+                        openCheckoutModal();
+                        customSaleQtyInput.focus();
+                    });
+                }
+            }, 0);
         }
         return;
     }
@@ -869,6 +885,44 @@ checkoutFab.addEventListener('click', openCheckoutModal);
 closeCheckoutModalBtn.addEventListener('click', closeCheckoutModal);
 cancelCheckoutModalBtn.addEventListener('click', closeCheckoutModal);
 
+addCustomSaleBtn.addEventListener('click', () => {
+    const name = customSaleNameInput.value.trim();
+    const qty = parseInt(customSaleQtyInput.value);
+    const price = parseFloat(customSalePriceInput.value);
+
+    if (!name) {
+        showToast("Please enter an item name", true);
+        return;
+    }
+    if (!qty || qty <= 0) {
+        showToast("Please enter a valid quantity", true);
+        return;
+    }
+    if (isNaN(price) || price < 0) {
+        showToast("Please enter a valid price", true);
+        return;
+    }
+
+    const customId = 'custom_' + Date.now();
+    
+    cart[customId] = {
+        itemId: customId,
+        itemName: name + " (Unseen)",
+        quantity: qty,
+        pricePerPiece: price,
+        currentStock: Infinity, // Custom items don't have stock limits
+        isCustom: true
+    };
+
+    customSaleNameInput.value = '';
+    customSaleQtyInput.value = '1';
+    customSalePriceInput.value = '';
+    
+    updateCheckoutBadge();
+    renderCheckoutList();
+    showToast(`Added ${qty} pieces of ${name} to checkout.`);
+});
+
 confirmAllDropsBtn.addEventListener('click', async () => {
     const cartKeys = Object.keys(cart);
     if (cartKeys.length === 0) return;
@@ -882,7 +936,10 @@ confirmAllDropsBtn.addEventListener('click', async () => {
             const newStock = item.currentStock - item.quantity;
             const totalPrice = item.pricePerPiece * item.quantity;
 
-            await updateStockInDB(key, newStock);
+            if (!item.isCustom) {
+                await updateStockInDB(key, newStock);
+            }
+            
             await saveTransactionToDB({
                 itemId: key,
                 itemName: item.itemName,
